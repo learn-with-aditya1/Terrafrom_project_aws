@@ -41,8 +41,12 @@ pipeline {
                         sh "echo 'Running Terraform ${terraformAction} with AWS Access Key: ${env.AWS_ACCESS_KEY_ID} and Secret Key: ${env.AWS_SECRET_ACCESS_KEY}'"
                         // Run Terraform apply or destroy commands using the provided credentials
                     } else {
-                        sh "echo 'Running Terraform ${terraformAction}'"
-                        // Run Terraform plan command
+                        echo 'Running Terraform plan'
+                        sh 'terraform init'
+                        sh 'terraform plan -out=tfplan'
+                        
+                        echo 'Displaying Terraform plan output'
+                        sh 'terraform show -json tfplan'
                     }
                 }
             }

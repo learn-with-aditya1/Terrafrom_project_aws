@@ -2,7 +2,24 @@ pipeline {
     agent any
     
     stages {
+        stage('Choose Terraform Action') {
+            steps {
+                script {
+                    def action = input(
+                        id: 'terraformAction',
+                        message: 'Choose Terraform Action to Perform:',
+                        parameters: [
+                            choice(choices: ['plan', 'apply', 'destroy'], description: 'Select Action', name: 'TF_ACTION')
+                        ]
+                    )
+                }
+            }
+        }
+        
         stage('Input Credentials') {
+            when {
+                expression { return env.TF_ACTION in ['apply', 'destroy'] }
+            }
             steps {
                 script {
                     def awsAccessKeyId = input(
@@ -20,26 +37,22 @@ pipeline {
                             string(defaultValue: '', description: 'AWS Secret Access Key', name: 'AWS_SECRET_ACCESS_KEY')
                         ]
                     )
-                    
-                    // Other inputs for choosing Terraform workflow, if needed
-                    // For example:
-                    // def terraformWorkflow = input(
-                    //     id: 'terraformWorkflow',
-                    //     message: 'Choose Terraform workflow:',
-                    //     parameters: [
-                    //         choice(choices: ['workflowA', 'workflowB'], description: 'Terraform Workflow', name: 'TF_WORKFLOW')
-                    //     ]
-                    // )
                 }
             }
         }
         
-        stage('Terraform Apply') {
+        stage('Terraform Action') {
             steps {
                 script {
-                    // Run Terraform commands using the provided credentials and parameters
-                    sh "echo 'Running Terraform with AWS Access Key: ${awsAccessKeyId} and Secret Key: ${awsSecretAccessKey}'"
-                    // You can execute Terraform commands here based on the provided inputs
+                    def terraformAction = env.TF_ACTION ?: 'plan'
+                    
+                    if (terraformAction == 'apply' || terraformAction == 'destroy') {
+                        sh "echo 'Running Terraform ${terraformAction} with AWS Access Key: ${env.AWS_ACCESS_KEY_ID} and Secret Key: ${env.AWS_SECRET_ACCESS_KEY}'"
+                        // Run Terraform apply or destroy commands using the provided credentials
+                    } else {
+                        sh "echo 'Running Terraform ${terraformAction}'"
+                        // Run Terraform plan command
+                    }
                 }
             }
         }

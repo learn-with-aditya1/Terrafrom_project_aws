@@ -8,16 +8,25 @@ pipeline {
         string(name: 'AWS_SECRET_ACCESS_KEY', defaultValue: 'YOUR_DEFAULT_SECRET_KEY', description: 'AWS Secret Key')
     }
 
-    environment {
-        AWS_REGION             = params.AWS_REGION
-        AWS_ACCESS_KEY_ID     = params.AWS_ACCESS_KEY_ID
-        AWS_SECRET_ACCESS_KEY = params.AWS_SECRET_ACCESS_KEY
-    }
-
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+
+        stage('Set Environment Variables') {
+            steps {
+                script {
+                    withCredentials([
+                        string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
+                        string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
+                    ]) {
+                        env.AWS_REGION             = params.AWS_REGION
+                        env.AWS_ACCESS_KEY_ID     = AWS_ACCESS_KEY_ID
+                        env.AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
+                    }
+                }
             }
         }
 
@@ -32,7 +41,7 @@ pipeline {
         stage('Terraform Action') {
             steps {
                 script {
-                    sh "terraform var -var='aws_region=${params.AWS_REGION}' -var='aws_access_key=${params.AWS_ACCESS_KEY_ID}' -var='aws_secret_key=${params.AWS_SECRET_ACCESS_KEY}'"
+                    sh "terraform var -var='aws_region=${env.AWS_REGION}' -var='aws_access_key=${env.AWS_ACCESS_KEY_ID}' -var='aws_secret_key=${env.AWS_SECRET_ACCESS_KEY}'"
                     
                     if (params.TF_ACTION == 'plan') {
                         sh 'terraform plan'

@@ -22,21 +22,12 @@ pipeline {
             }
             steps {
                 script {
-                    def awsAccessKeyId = input(
-                        id: 'awsAccessKeyId',
-                        message: 'Enter AWS Access Key ID:',
-                        parameters: [
-                            string(defaultValue: '', description: 'AWS Access Key ID', name: 'AWS_ACCESS_KEY_ID')
-                        ]
-                    )
+                    def awsAccessKeyId = credentials('aws-access-key')
+                    def awsSecretAccessKey = credentials('aws-secret-access-key')
                     
-                    def awsSecretAccessKey = input(
-                        id: 'awsSecretAccessKey',
-                        message: 'Enter AWS Secret Access Key:',
-                        parameters: [
-                            string(defaultValue: '', description: 'AWS Secret Access Key', name: 'AWS_SECRET_ACCESS_KEY')
-                        ]
-                    )
+                    // Set environment variables for AWS credentials
+                    env.AWS_ACCESS_KEY_ID = awsAccessKeyId
+                    env.AWS_SECRET_ACCESS_KEY = awsSecretAccessKey
                 }
             }
         }

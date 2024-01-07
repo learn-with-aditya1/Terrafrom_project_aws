@@ -41,8 +41,6 @@ pipeline {
         stage('Terraform Action') {
             steps {
                 script {
-                    sh "terraform var -var='aws_region=${env.AWS_REGION}' -var='aws_access_key=${env.AWS_ACCESS_KEY_ID}' -var='aws_secret_key=${env.AWS_SECRET_ACCESS_KEY}'"
-                    
                     if (params.TF_ACTION == 'plan') {
                         sh 'terraform plan'
                     } else if (params.TF_ACTION == 'apply') {

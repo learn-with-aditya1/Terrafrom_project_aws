@@ -2,10 +2,15 @@
 
 #we will be using AWS cloud in this provider
 
-provider "aws" {
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "5.31.0"
+    }
+  }
+}
 
-	region = var.aws_region   #region where you aws resources will be deployed
-	assume_role {
-   	 role_arn = "arn:aws:iam::481085503424:role/ec2-jenkins-terrafrom"
- 	}
+provider "aws" {
+  # Configuration options
 }
